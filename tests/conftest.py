@@ -17,7 +17,7 @@ from datetime import datetime
 test_results = []
 suite_start_time = None
 
-CHROMEDRIVER_PATH = r"C:\Users\User\.wdm\drivers\chromedriver\win64\148.0.7778.178\chromedriver-win32\chromedriver.exe"
+from webdriver_manager.chrome import ChromeDriverManager
 BACKEND_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "backend")
 BASE_URL = "http://127.0.0.1:8000"
 
@@ -165,7 +165,7 @@ def driver():
     options.add_argument("--disable-web-security")
     options.add_argument("--allow-insecure-localhost")
 
-    service = ChromeService(executable_path=CHROMEDRIVER_PATH)
+    service = ChromeService(executable_path=ChromeDriverManager().install())
     d = webdriver.Chrome(service=service, options=options)
     d.implicitly_wait(3)
 
