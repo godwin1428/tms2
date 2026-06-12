@@ -4,6 +4,7 @@ Tests doctor login, navigation, schedule, prescriptions, templates, earnings, an
 """
 import pytest
 import time
+from conftest import wait_for_app
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -13,7 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 def login_doctor(driver, base_url, email="anjali@tms.com"):
     """Login as a doctor."""
     driver.get(base_url)
-    time.sleep(0.5)
+    wait_for_app(driver)
     driver.execute_script("App.showLogin()")
     time.sleep(0.5)
     wait = WebDriverWait(driver, 5)
