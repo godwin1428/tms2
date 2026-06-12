@@ -27,6 +27,10 @@ jobs:
           pip install -r backend/requirements.txt
           pip install -r tests/requirements.txt
 
+      - name: Setup chromedriver permissions
+        run: |
+          find ~/.wdm -name "chromedriver" -type f -exec chmod +x {} \; || true
+
       - name: Run E2E Tests
         run: |
           pytest tests/
