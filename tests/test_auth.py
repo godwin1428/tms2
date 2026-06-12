@@ -5,6 +5,7 @@ Tests login, signup, role-based routing, and session management.
 import pytest
 import time
 import uuid
+from conftest import wait_for_app
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -22,7 +23,7 @@ def navigate_to_login(driver, base_url):
         time.sleep(0.5)
     except:
         driver.get(base_url)
-        time.sleep(0.5)
+        wait_for_app(driver)
         driver.execute_script("App.showLogin()")
         time.sleep(0.5)
 
