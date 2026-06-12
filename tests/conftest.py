@@ -184,3 +184,13 @@ def driver():
     yield d
 
     d.quit()
+
+
+# ── Shared JS-readiness helper ──
+from selenium.webdriver.support.ui import WebDriverWait
+
+def wait_for_app(driver, timeout=10):
+    """Wait until the App JS object is defined on the page."""
+    WebDriverWait(driver, timeout).until(
+        lambda d: d.execute_script("return typeof App !== 'undefined' && typeof App.showLogin === 'function'")
+    )
