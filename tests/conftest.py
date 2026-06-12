@@ -165,7 +165,15 @@ def driver():
     options.add_argument("--disable-web-security")
     options.add_argument("--allow-insecure-localhost")
 
-    service = ChromeService(executable_path=ChromeDriverManager().install())
+    driver_path = ChromeDriverManager().install()
+    # Fix for webdriver-manager returning incorrect file on Linux
+    if "THIRD_PARTY_NOTICES" in driver_path or "LICENSE" in driver_path:
+        import os, sys
+        driver_dir = os.path.dirname(driver_path)
+        driver_name = "chromedriver.exe" if sys.platform == "win32" else "chromedriver"
+        driver_path = os.path.join(driver_dir, driver_name)
+        
+    service = ChromeService(executable_path=driver_path)
     d = webdriver.Chrome(service=service, options=options)
     d.implicitly_wait(3)
 
