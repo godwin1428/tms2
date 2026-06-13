@@ -145,10 +145,10 @@ class TestDoctorSlots:
         today = date.today().isoformat()
         resp = client.get(f"/api/doctors/1/slots?slot_date={today}")
         slots = resp.json()
-        slot_09 = next((s for s in slots if s["time"] == "09:00"), None)
-        assert slot_09 is not None
-        # 09:00 should be booked (from seed data)
-        assert slot_09["available"] is False
+        slot_1430 = next((s for s in slots if s["time"] == "14:30"), None)
+        assert slot_1430 is not None
+        # 14:30 should be booked (from seed data)
+        assert slot_1430["available"] is False
 
 
 # ═══════════════════════════════════════════════
