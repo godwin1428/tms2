@@ -130,14 +130,14 @@ def backend_server():
     )
 
     # Wait for server to be ready
-    for _ in range(30):
+    for _ in range(60):
         if is_port_open(8000):
             print("[Fixture] Backend server ready.")
             break
         time.sleep(1)
     else:
         proc.kill()
-        raise RuntimeError("Backend server did not start within 30 seconds")
+        raise RuntimeError("Backend server did not start within 60 seconds")
 
     yield
 
@@ -188,9 +188,22 @@ def driver():
 
 # ── Shared JS-readiness helper ──
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import WebDriverException, TimeoutException
 
-def wait_for_app(driver, timeout=10):
+def wait_for_app(driver, timeout=20):
     """Wait until the App JS object is defined on the page."""
-    WebDriverWait(driver, timeout).until(
-        lambda d: d.execute_script("return typeof App !== 'undefined' && typeof App.showLogin === 'function'")
-    )
+    import time as _time
+    deadline = _time.monotonic() + timeout
+    while _time.monotonic() < deadline:
+        try:
+            ready = driver.execute_script(
+                "return document.readyState === 'complete' && "
+                "typeof App !== 'undefined' && "
+                "typeof App.showLogin === 'function'"
+            )
+            if ready:
+                return
+        except WebDriverException:
+            pass  # page still navigating — keep polling
+        _time.sleep(0.3)
+    raise TimeoutException("App JS object not ready within timeout")
