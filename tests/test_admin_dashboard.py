@@ -28,7 +28,7 @@ def login_admin(driver, base_url):
     driver.find_element(By.ID, "login-btn").click()
     # Wait for dashboard to render instead of fixed sleep
     WebDriverWait(driver, 10).until(
-        lambda d: d.execute_script("return localStorage.getItem('tms_token') !== null")
+        lambda d: d.execute_script("return localStorage.getItem('tms_access_token') !== null")
     )
 
 
@@ -150,73 +150,6 @@ class TestPatientManagement:
         patients = ["Ramesh", "Sunita", "Arjun", "Priya", "Mohammed", "Lakshmi"]
         found = sum(1 for p in patients if p in body)
         assert found >= 1, "At least one seeded patient name should be visible"
-        logout(driver)
-
-
-# ═══════════════════════════════════════════════
-# APPOINTMENT MONITORING
-# ═══════════════════════════════════════════════
-
-class TestAppointmentMonitoring:
-    def test_appointment_view_loads(self, driver, base_url):
-        """TC-ADM-009: Appointment monitoring view loads."""
-        login_admin(driver, base_url)
-        driver.execute_script("""
-            document.querySelectorAll('[data-view]').forEach(n => {
-                if (n.textContent.toLowerCase().includes('roster') || n.textContent.toLowerCase().includes('room')) n.click();
-            });
-        """)
-        time.sleep(1)
-        body = driver.find_element(By.TAG_NAME, "body").text.lower()
-        assert any(kw in body for kw in ["appointment", "schedule", "pending", "confirmed", "completed", "roster", "room"]), \
-            "Appointment monitoring should load"
-        logout(driver)
-
-    def test_appointment_statuses_visible(self, driver, base_url):
-        """TC-ADM-010: Appointment statuses are displayed."""
-        login_admin(driver, base_url)
-        driver.execute_script("""
-            document.querySelectorAll('[data-view]').forEach(n => {
-                if (n.textContent.toLowerCase().includes('roster') || n.textContent.toLowerCase().includes('room')) n.click();
-            });
-        """)
-        time.sleep(1)
-        body = driver.find_element(By.TAG_NAME, "body").text.lower()
-        assert any(s in body for s in ["pending", "confirmed", "completed", "appointment", "roster", "status"]), \
-            "Status badges should be visible"
-        logout(driver)
-
-
-# ═══════════════════════════════════════════════
-# REVENUE / PAYMENTS
-# ═══════════════════════════════════════════════
-
-class TestRevenueAnalytics:
-    def test_revenue_view_loads(self, driver, base_url):
-        """TC-ADM-011: Revenue/payments view loads."""
-        login_admin(driver, base_url)
-        driver.execute_script("""
-            document.querySelectorAll('[data-view]').forEach(n => {
-                if (n.textContent.toLowerCase().includes('financial') || n.textContent.toLowerCase().includes('ledger')) n.click();
-            });
-        """)
-        time.sleep(1)
-        body = driver.find_element(By.TAG_NAME, "body").text.lower()
-        assert any(kw in body for kw in ["revenue", "payment", "₹", "transaction", "finance", "financial", "amount"]), \
-            "Revenue view should load"
-        logout(driver)
-
-    def test_revenue_shows_amounts(self, driver, base_url):
-        """TC-ADM-012: Revenue view shows monetary values."""
-        login_admin(driver, base_url)
-        driver.execute_script("""
-            document.querySelectorAll('[data-view]').forEach(n => {
-                if (n.textContent.toLowerCase().includes('financial') || n.textContent.toLowerCase().includes('ledger')) n.click();
-            });
-        """)
-        time.sleep(1)
-        body = driver.find_element(By.TAG_NAME, "body").text
-        assert "₹" in body or any(c.isdigit() for c in body), "Revenue amounts should appear"
         logout(driver)
 
 

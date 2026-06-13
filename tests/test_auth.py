@@ -34,7 +34,7 @@ def do_login(driver, base_url, email, password):
     driver.find_element(By.ID, "login-btn").click()
     # Wait for auth state to change rather than a fixed sleep
     WebDriverWait(driver, 10).until(
-        lambda d: d.execute_script("return localStorage.getItem('tms_token') !== null")
+        lambda d: d.execute_script("return localStorage.getItem('tms_access_token') !== null")
         or d.find_elements(By.ID, "login-email")
     )
 

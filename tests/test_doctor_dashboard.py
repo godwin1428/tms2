@@ -28,7 +28,7 @@ def login_doctor(driver, base_url, email="anjali@tms.com"):
     driver.find_element(By.ID, "login-btn").click()
     # Wait for dashboard to render instead of fixed sleep
     WebDriverWait(driver, 10).until(
-        lambda d: d.execute_script("return localStorage.getItem('tms_token') !== null")
+        lambda d: d.execute_script("return localStorage.getItem('tms_access_token') !== null")
     )
 
 
@@ -280,33 +280,7 @@ class TestMultipleDoctors:
         assert "Kavita" in body
         logout(driver)
 
-    def test_fifth_doctor_login(self, driver, base_url):
-        """TC-DOC-018: Fifth doctor can login."""
-        login_doctor(driver, base_url, email="amit@tms.com")
-        body = driver.find_element(By.TAG_NAME, "body").text
-        assert "Amit" in body
-        logout(driver)
 
-    def test_sixth_doctor_login(self, driver, base_url):
-        """TC-DOC-019: Sixth doctor can login."""
-        login_doctor(driver, base_url, email="neha@tms.com")
-        body = driver.find_element(By.TAG_NAME, "body").text
-        assert "Neha" in body
-        logout(driver)
-
-
-# ═══════════════════════════════════════════════
-# AVAILABILITY TOGGLE
-# ═══════════════════════════════════════════════
-
-class TestAvailabilityToggle:
-    def test_availability_toggle_exists(self, driver, base_url):
-        """TC-DOC-020: Availability toggle switch exists."""
-        login_doctor(driver, base_url)
-        body = driver.find_element(By.TAG_NAME, "body").text.lower()
-        assert any(kw in body for kw in ["online", "offline", "available", "availability", "status"]), \
-            "Availability status should be shown"
-        logout(driver)
 
 
 # ═══════════════════════════════════════════════

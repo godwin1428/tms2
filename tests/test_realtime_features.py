@@ -27,7 +27,7 @@ def login_patient(driver, base_url):
     pass_input.send_keys("Patient@123")
     driver.find_element(By.ID, "login-btn").click()
     WebDriverWait(driver, 10).until(
-        lambda d: d.execute_script("return localStorage.getItem('tms_token') !== null")
+        lambda d: d.execute_script("return localStorage.getItem('tms_access_token') !== null")
     )
 
 
@@ -46,7 +46,7 @@ def login_doctor(driver, base_url):
     pass_input.send_keys("Doctor@123")
     driver.find_element(By.ID, "login-btn").click()
     WebDriverWait(driver, 10).until(
-        lambda d: d.execute_script("return localStorage.getItem('tms_token') !== null")
+        lambda d: d.execute_script("return localStorage.getItem('tms_access_token') !== null")
     )
 
 
