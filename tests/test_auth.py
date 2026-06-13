@@ -15,23 +15,16 @@ from selenium.webdriver.support import expected_conditions as EC
 def navigate_to_login(driver, base_url):
     """Navigate to the login page."""
     driver.get(base_url)
-    time.sleep(1)
-    # Click 'Get Started' / Login link on home page
-    try:
-        # Try clicking the home page CTA that leads to login
-        driver.execute_script("App.showLogin()")
-        time.sleep(0.5)
-    except:
-        driver.get(base_url)
-        wait_for_app(driver)
-        driver.execute_script("App.showLogin()")
-        time.sleep(0.5)
+    driver.execute_script("localStorage.clear()")  # ensure clean auth state
+    wait_for_app(driver)  # wait until App JS is ready before calling showLogin
+    driver.execute_script("App.showLogin()")
+    time.sleep(0.5)
 
 
 def do_login(driver, base_url, email, password):
     """Perform a full login flow."""
     navigate_to_login(driver, base_url)
-    wait = WebDriverWait(driver, 5)
+    wait = WebDriverWait(driver, 10)
     email_input = wait.until(EC.presence_of_element_located((By.ID, "login-email")))
     email_input.clear()
     email_input.send_keys(email)
@@ -39,7 +32,11 @@ def do_login(driver, base_url, email, password):
     pass_input.clear()
     pass_input.send_keys(password)
     driver.find_element(By.ID, "login-btn").click()
-    time.sleep(1.5)
+    # Wait for auth state to change rather than a fixed sleep
+    WebDriverWait(driver, 10).until(
+        lambda d: d.execute_script("return localStorage.getItem('tms_token') !== null")
+        or d.find_elements(By.ID, "login-email")
+    )
 
 
 def do_logout(driver):
