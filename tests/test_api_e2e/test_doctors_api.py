@@ -143,12 +143,12 @@ class TestDoctorSlots:
     def test_booked_slots_marked_unavailable(self, client):
         """TC-DOC-014: Booked slots are correctly marked as unavailable."""
         today = date.today().isoformat()
-        resp = client.get(f"/api/doctors/1/slots?slot_date={today}")
+        resp = client.get(f"/api/doctors/2/slots?slot_date={today}")
         slots = resp.json()
-        slot_1430 = next((s for s in slots if s["time"] == "14:30"), None)
-        assert slot_1430 is not None
-        # 14:30 should be booked (from seed data)
-        assert slot_1430["available"] is False
+        slot_10 = next((s for s in slots if s["time"] == "10:00"), None)
+        assert slot_10 is not None
+        # 10:00 should be booked (from seed data, it's confirmed)
+        assert slot_10["available"] is False
 
 
 # ═══════════════════════════════════════════════
