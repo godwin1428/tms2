@@ -34,6 +34,24 @@ jobs:
           pip install -r backend/requirements.txt
           pip install -r tests/requirements.txt
 
+      - name: Start Backend Server
+        run: |
+          mkdir -p backend/uploads
+          cd backend
+          python seed_data.py
+          nohup python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+          echo $! > uvicorn.pid
+          # Wait until the server is accepting connections
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:8000/api/health > /dev/null 2>&1; then
+              echo "Backend ready after ${i}s"
+              break
+            fi
+            echo "Waiting for backend... (${i}s)"
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:8000/api/health || (echo "Backend failed to start" && exit 1)
+
       - name: Run E2E Tests
         run: |
           pytest tests/

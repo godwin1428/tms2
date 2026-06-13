@@ -136,8 +136,13 @@ def backend_server():
             break
         time.sleep(1)
     else:
+        stdout, stderr = proc.communicate(timeout=5)
         proc.kill()
-        raise RuntimeError("Backend server did not start within 60 seconds")
+        raise RuntimeError(
+            f"Backend server did not start within 60 seconds.\n"
+            f"STDOUT: {stdout.decode()[-2000:]}\n"
+            f"STDERR: {stderr.decode()[-2000:]}"
+        )
 
     yield
 
