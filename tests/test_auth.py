@@ -15,8 +15,9 @@ from selenium.webdriver.support import expected_conditions as EC
 def navigate_to_login(driver, base_url):
     """Navigate to the login page."""
     driver.get(base_url)
-    driver.execute_script("localStorage.clear()")  # clear before reload
-    driver.refresh()  # reload so JS starts fresh with cleared storage
+    wait_for_app(driver)
+    driver.execute_script("localStorage.clear(); sessionStorage.clear();")
+    driver.get(base_url)  # reload with clean storage
     wait_for_app(driver)
     driver.execute_script("App.showLogin()")
     time.sleep(0.5)
