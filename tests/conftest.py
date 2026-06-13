@@ -76,8 +76,11 @@ def pytest_sessionfinish(session, exitstatus):
     total_count = len(test_results)
     pass_rate = round((passed_count / total_count * 100), 2) if total_count > 0 else 0
 
+    overall_status = "✅ ALL PASSED" if failed_count == 0 else f"❌ {failed_count} FAILED"
+
     summary_data = [{
         "Test Suite": "TMS E2E Functionality Tests",
+        "Overall Status": overall_status,
         "Total Tests": total_count,
         "Passed": passed_count,
         "Failed": failed_count,
@@ -153,6 +156,38 @@ def base_url(backend_server):
     return BASE_URL
 
 
+def _ensure_executable(path: str):
+    """Ensure the given file is executable."""
+    if os.path.isfile(path) and not os.access(path, os.X_OK):
+        os.chmod(path, 0o755)
+
+def _resolve_chromedriver() -> str:
+    import shutil
+    # 1. $CHROMEDRIVER_PATH — set by browser-actions/setup-chrome on CI
+    env_path = os.environ.get("CHROMEDRIVER_PATH")
+    if env_path and os.path.isfile(env_path):
+        _ensure_executable(env_path)
+        return env_path
+
+    # 2. chromedriver already on PATH (some CI runners have it)
+    which_path = shutil.which("chromedriver")
+    if which_path:
+        _ensure_executable(which_path)
+        return which_path
+
+    # 3. webdriver-manager download — local dev fallback only
+    from webdriver_manager.chrome import ChromeDriverManager
+    driver_path = ChromeDriverManager().install()
+    
+    if "THIRD_PARTY_NOTICES" in driver_path or "LICENSE" in driver_path:
+        import sys
+        driver_dir = os.path.dirname(driver_path)
+        driver_name = "chromedriver.exe" if sys.platform == "win32" else "chromedriver"
+        driver_path = os.path.join(driver_dir, driver_name)
+    
+    _ensure_executable(driver_path)
+    return driver_path
+
 @pytest.fixture(scope="session")
 def driver():
     """Create a headless Chrome WebDriver for the full session."""
@@ -165,14 +200,7 @@ def driver():
     options.add_argument("--disable-web-security")
     options.add_argument("--allow-insecure-localhost")
 
-    driver_path = ChromeDriverManager().install()
-    # Fix for webdriver-manager returning incorrect file on Linux
-    if "THIRD_PARTY_NOTICES" in driver_path or "LICENSE" in driver_path:
-        import os, sys
-        driver_dir = os.path.dirname(driver_path)
-        driver_name = "chromedriver.exe" if sys.platform == "win32" else "chromedriver"
-        driver_path = os.path.join(driver_dir, driver_name)
-        
+    driver_path = _resolve_chromedriver()
     service = ChromeService(executable_path=driver_path)
     d = webdriver.Chrome(service=service, options=options)
     d.implicitly_wait(3)
