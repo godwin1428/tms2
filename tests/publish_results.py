@@ -71,7 +71,7 @@ def main():
     markdown_output.append("| No. | Category | Test Name | Status |")
     markdown_output.append("|---|---|---|---|")
     for r in e2e_details:
-        status_emoji = "✅ PASSED" if r.get("Status") == "PASSED" else "❌ FAILED"
+        status_emoji = "✅ PASSED" if str(r.get("Status")).upper() == "PASSED" else "❌ FAILED"
         markdown_output.append(f"| {r.get('No.')} | {r.get('Category')} | `{r.get('Test Name')}` | {status_emoji} |")
     markdown_output.append("\n</details>\n")
     
@@ -81,7 +81,7 @@ def main():
     markdown_output.append("| No. | Category | Test Name | Status |")
     markdown_output.append("|---|---|---|---|")
     for r in sec_details:
-        status_emoji = "✅ PASSED" if r.get("Status") == "PASSED" else "❌ FAILED"
+        status_emoji = "✅ PASSED" if str(r.get("Status")).upper() == "PASSED" else "❌ FAILED"
         markdown_output.append(f"| {r.get('No.')} | {r.get('Category')} | `{r.get('Test Name')}` | {status_emoji} |")
     markdown_output.append("\n</details>\n")
     
