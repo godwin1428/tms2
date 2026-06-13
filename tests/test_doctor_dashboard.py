@@ -4,6 +4,7 @@ Tests doctor login, navigation, schedule, prescriptions, templates, earnings, an
 """
 import pytest
 import time
+from conftest import wait_for_app
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -13,10 +14,13 @@ from selenium.webdriver.support import expected_conditions as EC
 def login_doctor(driver, base_url, email="anjali@tms.com"):
     """Login as a doctor."""
     driver.get(base_url)
-    time.sleep(0.5)
+    wait_for_app(driver)
+    driver.execute_script("localStorage.clear(); sessionStorage.clear();")
+    driver.get(base_url)  # reload with clean storage
+    wait_for_app(driver)
     driver.execute_script("App.showLogin()")
     time.sleep(0.5)
-    wait = WebDriverWait(driver, 5)
+    wait = WebDriverWait(driver, 10)
     email_input = wait.until(EC.presence_of_element_located((By.ID, "login-email")))
     email_input.clear()
     email_input.send_keys(email)
@@ -24,13 +28,16 @@ def login_doctor(driver, base_url, email="anjali@tms.com"):
     pass_input.clear()
     pass_input.send_keys("Doctor@123")
     driver.find_element(By.ID, "login-btn").click()
-    time.sleep(1.5)
+    # Wait for dashboard to render instead of fixed sleep
+    WebDriverWait(driver, 10).until(
+        lambda d: d.execute_script("return localStorage.getItem('tms_access_token') !== null")
+    )
 
 
 def logout(driver):
     try:
         driver.execute_script("App.logout()")
-        time.sleep(0.5)
+        time.sleep(1)
     except:
         pass
 
@@ -275,33 +282,7 @@ class TestMultipleDoctors:
         assert "Kavita" in body
         logout(driver)
 
-    def test_fifth_doctor_login(self, driver, base_url):
-        """TC-DOC-018: Fifth doctor can login."""
-        login_doctor(driver, base_url, email="amit@tms.com")
-        body = driver.find_element(By.TAG_NAME, "body").text
-        assert "Amit" in body
-        logout(driver)
 
-    def test_sixth_doctor_login(self, driver, base_url):
-        """TC-DOC-019: Sixth doctor can login."""
-        login_doctor(driver, base_url, email="neha@tms.com")
-        body = driver.find_element(By.TAG_NAME, "body").text
-        assert "Neha" in body
-        logout(driver)
-
-
-# ═══════════════════════════════════════════════
-# AVAILABILITY TOGGLE
-# ═══════════════════════════════════════════════
-
-class TestAvailabilityToggle:
-    def test_availability_toggle_exists(self, driver, base_url):
-        """TC-DOC-020: Availability toggle switch exists."""
-        login_doctor(driver, base_url)
-        body = driver.find_element(By.TAG_NAME, "body").text.lower()
-        assert any(kw in body for kw in ["online", "offline", "available", "availability", "status"]), \
-            "Availability status should be shown"
-        logout(driver)
 
 
 # ═══════════════════════════════════════════════

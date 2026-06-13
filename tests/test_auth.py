@@ -5,6 +5,7 @@ Tests login, signup, role-based routing, and session management.
 import pytest
 import time
 import uuid
+from conftest import wait_for_app
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -14,23 +15,18 @@ from selenium.webdriver.support import expected_conditions as EC
 def navigate_to_login(driver, base_url):
     """Navigate to the login page."""
     driver.get(base_url)
-    time.sleep(1)
-    # Click 'Get Started' / Login link on home page
-    try:
-        # Try clicking the home page CTA that leads to login
-        driver.execute_script("App.showLogin()")
-        time.sleep(0.5)
-    except:
-        driver.get(base_url)
-        time.sleep(0.5)
-        driver.execute_script("App.showLogin()")
-        time.sleep(0.5)
+    wait_for_app(driver)
+    driver.execute_script("localStorage.clear(); sessionStorage.clear();")
+    driver.get(base_url)  # reload with clean storage
+    wait_for_app(driver)
+    driver.execute_script("App.showLogin()")
+    time.sleep(0.5)
 
 
 def do_login(driver, base_url, email, password):
     """Perform a full login flow."""
     navigate_to_login(driver, base_url)
-    wait = WebDriverWait(driver, 5)
+    wait = WebDriverWait(driver, 10)
     email_input = wait.until(EC.presence_of_element_located((By.ID, "login-email")))
     email_input.clear()
     email_input.send_keys(email)
@@ -38,14 +34,18 @@ def do_login(driver, base_url, email, password):
     pass_input.clear()
     pass_input.send_keys(password)
     driver.find_element(By.ID, "login-btn").click()
-    time.sleep(1.5)
+    # Wait for auth state to change rather than a fixed sleep
+    WebDriverWait(driver, 10).until(
+        lambda d: d.execute_script("return localStorage.getItem('tms_access_token') !== null")
+        or d.find_elements(By.ID, "login-email")
+    )
 
 
 def do_logout(driver):
     """Logout the current user."""
     try:
         driver.execute_script("App.logout()")
-        time.sleep(0.5)
+        time.sleep(1)
     except:
         pass
 

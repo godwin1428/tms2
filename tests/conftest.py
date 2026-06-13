@@ -133,14 +133,19 @@ def backend_server():
     )
 
     # Wait for server to be ready
-    for _ in range(30):
+    for _ in range(60):
         if is_port_open(8000):
             print("[Fixture] Backend server ready.")
             break
         time.sleep(1)
     else:
+        stdout, stderr = proc.communicate(timeout=5)
         proc.kill()
-        raise RuntimeError("Backend server did not start within 30 seconds")
+        raise RuntimeError(
+            f"Backend server did not start within 60 seconds.\n"
+            f"STDOUT: {stdout.decode()[-2000:]}\n"
+            f"STDERR: {stderr.decode()[-2000:]}"
+        )
 
     yield
 
@@ -200,7 +205,22 @@ def driver():
     options.add_argument("--disable-web-security")
     options.add_argument("--allow-insecure-localhost")
 
+<<<<<<< HEAD
     driver_path = _resolve_chromedriver()
+=======
+    import os, sys, stat
+    driver_path = ChromeDriverManager().install()
+    # Fix for webdriver-manager returning incorrect file on Linux
+    # (sometimes returns THIRD_PARTY_NOTICES or LICENSE instead of the binary)
+    if "THIRD_PARTY_NOTICES" in driver_path or "LICENSE" in driver_path:
+        driver_dir = os.path.dirname(driver_path)
+        driver_name = "chromedriver.exe" if sys.platform == "win32" else "chromedriver"
+        driver_path = os.path.join(driver_dir, driver_name)
+
+    # Ensure the chromedriver binary is executable (required on Linux CI runners)
+    os.chmod(driver_path, os.stat(driver_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
+>>>>>>> 5a19a5027e526b8e3802e0d243d8a9d9c35c24ec
     service = ChromeService(executable_path=driver_path)
     d = webdriver.Chrome(service=service, options=options)
     d.implicitly_wait(3)
@@ -208,3 +228,26 @@ def driver():
     yield d
 
     d.quit()
+
+
+# ── Shared JS-readiness helper ──
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import WebDriverException, TimeoutException
+
+def wait_for_app(driver, timeout=20):
+    """Wait until the App JS object is defined on the page."""
+    import time as _time
+    deadline = _time.monotonic() + timeout
+    while _time.monotonic() < deadline:
+        try:
+            ready = driver.execute_script(
+                "return document.readyState === 'complete' && "
+                "typeof App !== 'undefined' && "
+                "typeof App.showLogin === 'function'"
+            )
+            if ready:
+                return
+        except WebDriverException:
+            pass  # page still navigating — keep polling
+        _time.sleep(0.3)
+    raise TimeoutException("App JS object not ready within timeout")

@@ -5,6 +5,7 @@ Tests WebRTC, WebSocket, AI Triage, Bluetooth, and homepage elements.
 import pytest
 import time
 import requests
+from conftest import wait_for_app
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -13,10 +14,13 @@ from selenium.webdriver.support import expected_conditions as EC
 # ── Helpers ──
 def login_patient(driver, base_url):
     driver.get(base_url)
-    time.sleep(0.5)
+    wait_for_app(driver)
+    driver.execute_script("localStorage.clear(); sessionStorage.clear();")
+    driver.get(base_url)  # reload with clean storage
+    wait_for_app(driver)
     driver.execute_script("App.showLogin()")
     time.sleep(0.5)
-    wait = WebDriverWait(driver, 5)
+    wait = WebDriverWait(driver, 10)
     email_input = wait.until(EC.presence_of_element_located((By.ID, "login-email")))
     email_input.clear()
     email_input.send_keys("ramesh@tms.com")
@@ -24,15 +28,20 @@ def login_patient(driver, base_url):
     pass_input.clear()
     pass_input.send_keys("Patient@123")
     driver.find_element(By.ID, "login-btn").click()
-    time.sleep(1.5)
+    WebDriverWait(driver, 10).until(
+        lambda d: d.execute_script("return localStorage.getItem('tms_access_token') !== null")
+    )
 
 
 def login_doctor(driver, base_url):
     driver.get(base_url)
-    time.sleep(0.5)
+    wait_for_app(driver)
+    driver.execute_script("localStorage.clear(); sessionStorage.clear();")
+    driver.get(base_url)  # reload with clean storage
+    wait_for_app(driver)
     driver.execute_script("App.showLogin()")
     time.sleep(0.5)
-    wait = WebDriverWait(driver, 5)
+    wait = WebDriverWait(driver, 10)
     email_input = wait.until(EC.presence_of_element_located((By.ID, "login-email")))
     email_input.clear()
     email_input.send_keys("anjali@tms.com")
@@ -40,13 +49,15 @@ def login_doctor(driver, base_url):
     pass_input.clear()
     pass_input.send_keys("Doctor@123")
     driver.find_element(By.ID, "login-btn").click()
-    time.sleep(1.5)
+    WebDriverWait(driver, 10).until(
+        lambda d: d.execute_script("return localStorage.getItem('tms_access_token') !== null")
+    )
 
 
 def logout(driver):
     try:
         driver.execute_script("App.logout()")
-        time.sleep(0.5)
+        time.sleep(1)
     except:
         pass
 
@@ -82,14 +93,20 @@ class TestHomePage:
     def test_homepage_loads(self, driver, base_url):
         """TC-RT-004: Homepage renders with TMS branding."""
         driver.get(base_url)
-        time.sleep(1)
+        wait_for_app(driver)
+        driver.execute_script("localStorage.clear(); sessionStorage.clear();")
+        driver.get(base_url)
+        wait_for_app(driver)
         body = driver.find_element(By.TAG_NAME, "body").text
         assert "TMS" in body or "Telemedicine" in body, "Homepage should show TMS branding"
 
     def test_homepage_has_login_cta(self, driver, base_url):
         """TC-RT-005: Homepage has login/get started CTA."""
         driver.get(base_url)
-        time.sleep(1)
+        wait_for_app(driver)
+        driver.execute_script("localStorage.clear(); sessionStorage.clear();")
+        driver.get(base_url)
+        wait_for_app(driver)
         body = driver.find_element(By.TAG_NAME, "body").text.lower()
         assert any(kw in body for kw in ["get started", "login", "sign in", "register"]), \
             "Homepage should have login CTA"

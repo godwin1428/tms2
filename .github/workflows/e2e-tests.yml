@@ -30,33 +30,18 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: "pip"
-
-      - name: Install Chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable
-
+          
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
           pip install -r tests/requirements.txt
 
-      - name: Create upload directories
+      - name: Setup chromedriver permissions
         run: |
-          mkdir -p backend/uploads/prescriptions
-          mkdir -p backend/uploads/records
-          mkdir -p backend/uploads/profiles
+          find ~/.wdm -name "chromedriver" -type f -exec chmod +x {} \; || true
 
-      - name: Run API E2E Tests
-        working-directory: .
-        env:
-          SECRET_KEY: tms_ci_test_secret_key_2026
-          CORS_ORIGINS: "*"
-          GEMINI_API_KEY: ""
-          DATABASE_URL: "sqlite:///:memory:"
-          PYTHONPATH: ${{ github.workspace }}/tests:${{ github.workspace }}/backend
+      - name: Run E2E Tests
         run: |
           python -m pytest tests/test_api_e2e/ -v --tb=short 2>&1 | tee test_output.txt
           # Capture exit code from pytest (not tee)
@@ -89,4 +74,4 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add E2E_Test_Report_TMS_*.xlsx || true
           git commit -m "chore: automated E2E test report [skip ci]" || echo "No changes to commit"
-          git push || echo "Push failed (may be a PR)"
+          git push

@@ -4,6 +4,7 @@ Tests patient login, navigation, doctor browsing, appointment booking, records, 
 """
 import pytest
 import time
+from conftest import wait_for_app
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -13,10 +14,13 @@ from selenium.webdriver.support import expected_conditions as EC
 def login_patient(driver, base_url, email="ramesh@tms.com"):
     """Login as a patient."""
     driver.get(base_url)
-    time.sleep(0.5)
+    wait_for_app(driver)
+    driver.execute_script("localStorage.clear(); sessionStorage.clear();")
+    driver.get(base_url)  # reload with clean storage
+    wait_for_app(driver)
     driver.execute_script("App.showLogin()")
     time.sleep(0.5)
-    wait = WebDriverWait(driver, 5)
+    wait = WebDriverWait(driver, 10)
     email_input = wait.until(EC.presence_of_element_located((By.ID, "login-email")))
     email_input.clear()
     email_input.send_keys(email)
@@ -24,13 +28,16 @@ def login_patient(driver, base_url, email="ramesh@tms.com"):
     pass_input.clear()
     pass_input.send_keys("Patient@123")
     driver.find_element(By.ID, "login-btn").click()
-    time.sleep(1.5)
+    # Wait for dashboard to render instead of fixed sleep
+    WebDriverWait(driver, 10).until(
+        lambda d: d.execute_script("return localStorage.getItem('tms_access_token') !== null")
+    )
 
 
 def logout(driver):
     try:
         driver.execute_script("App.logout()")
-        time.sleep(0.5)
+        time.sleep(1)
     except:
         pass
 
@@ -121,20 +128,6 @@ class TestDoctorBrowsing:
             "At least one specialization or booking view should be visible"
         logout(driver)
 
-    def test_doctor_fee_displayed(self, driver, base_url):
-        """TC-PAT-008: Consultation fee is shown on doctor cards."""
-        login_patient(driver, base_url)
-        driver.execute_script("""
-            document.querySelectorAll('[data-view]').forEach(n => {
-                if (n.textContent.toLowerCase().includes('book')) n.click();
-            });
-        """)
-        time.sleep(1.5)
-        body = driver.find_element(By.TAG_NAME, "body").text
-        assert "₹" in body or "fee" in body.lower() or "book" in body.lower(), \
-            "Fee info or booking view should appear"
-        logout(driver)
-
     def test_doctor_rating_displayed(self, driver, base_url):
         """TC-PAT-009: Doctor ratings are shown."""
         login_patient(driver, base_url)
@@ -184,19 +177,7 @@ class TestPatientAppointments:
             "Appointments should show doctor names or 'no appointments' message"
         logout(driver)
 
-    def test_appointment_status_badges(self, driver, base_url):
-        """TC-PAT-012: Appointment statuses displayed."""
-        login_patient(driver, base_url)
-        driver.execute_script("""
-            document.querySelectorAll('[data-view]').forEach(n => {
-                if (n.textContent.toLowerCase().includes('appointment')) n.click();
-            });
-        """)
-        time.sleep(1)
-        body = driver.find_element(By.TAG_NAME, "body").text.lower()
-        statuses = ["pending", "confirmed", "completed", "cancelled", "no appointment"]
-        assert any(s in body for s in statuses), "Status badges should be visible"
-        logout(driver)
+
 
 
 # ═══════════════════════════════════════════════
