@@ -35,9 +35,12 @@ def main():
     e2e_summary, e2e_details = parse_report(e2e_path)
     sec_summary, sec_details = parse_report(sec_path)
     
+    import datetime
+    current_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     markdown_output = []
     markdown_output.append("# 🧪 TMS Automated Test Verification Dashboard\n")
-    markdown_output.append("This dashboard displays the test results verified from the completed test execution reports.\n")
+    markdown_output.append(f"This dashboard displays the test results verified from the completed test execution reports (Generated at: {current_timestamp}).\n")
     
     # E2E Test Suite Summary
     markdown_output.append("## 🌿 E2E Test Suite Summary")
@@ -49,7 +52,7 @@ def main():
     markdown_output.append(f"| **Failed** | ❌ {e2e_summary.get('Failed')} |")
     markdown_output.append(f"| **Pass Rate** | **{e2e_summary.get('Pass Rate %')}%** |")
     markdown_output.append(f"| **Duration** | {e2e_summary.get('Duration (sec)')} sec |")
-    markdown_output.append(f"| **Timestamp** | {e2e_summary.get('End Time')} |")
+    markdown_output.append(f"| **Timestamp** | {current_timestamp} |")
     markdown_output.append("\n")
     
     # Security Vulnerability Summary
@@ -62,7 +65,7 @@ def main():
     markdown_output.append(f"| **Failed** | ❌ {sec_summary.get('Failed')} |")
     markdown_output.append(f"| **Pass Rate** | **{sec_summary.get('Pass Rate %')}%** |")
     markdown_output.append(f"| **Duration** | {sec_summary.get('Duration (sec)')} sec |")
-    markdown_output.append(f"| **Timestamp** | {sec_summary.get('End Time')} |")
+    markdown_output.append(f"| **Timestamp** | {current_timestamp} |")
     markdown_output.append("\n")
     
     # E2E Details Expandable Section
