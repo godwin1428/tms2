@@ -14,7 +14,8 @@ from selenium.webdriver.support import expected_conditions as EC
 def login_patient(driver, base_url, email="ramesh@tms.com"):
     """Login as a patient."""
     driver.get(base_url)
-    driver.execute_script("localStorage.clear()")  # ensure clean auth state
+    driver.execute_script("localStorage.clear()")  # clear before reload
+    driver.refresh()  # reload so JS starts fresh with cleared storage
     wait_for_app(driver)
     driver.execute_script("App.showLogin()")
     time.sleep(0.5)
@@ -35,7 +36,7 @@ def login_patient(driver, base_url, email="ramesh@tms.com"):
 def logout(driver):
     try:
         driver.execute_script("App.logout()")
-        time.sleep(0.5)
+        time.sleep(1)
     except:
         pass
 

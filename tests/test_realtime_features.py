@@ -14,7 +14,8 @@ from selenium.webdriver.support import expected_conditions as EC
 # ── Helpers ──
 def login_patient(driver, base_url):
     driver.get(base_url)
-    driver.execute_script("localStorage.clear()")  # ensure clean auth state
+    driver.execute_script("localStorage.clear()")  # clear before reload
+    driver.refresh()  # reload so JS starts fresh with cleared storage
     wait_for_app(driver)
     driver.execute_script("App.showLogin()")
     time.sleep(0.5)
@@ -33,7 +34,8 @@ def login_patient(driver, base_url):
 
 def login_doctor(driver, base_url):
     driver.get(base_url)
-    driver.execute_script("localStorage.clear()")  # ensure clean auth state
+    driver.execute_script("localStorage.clear()")  # clear before reload
+    driver.refresh()  # reload so JS starts fresh with cleared storage
     wait_for_app(driver)
     driver.execute_script("App.showLogin()")
     time.sleep(0.5)
@@ -53,7 +55,7 @@ def login_doctor(driver, base_url):
 def logout(driver):
     try:
         driver.execute_script("App.logout()")
-        time.sleep(0.5)
+        time.sleep(1)
     except:
         pass
 
@@ -90,6 +92,7 @@ class TestHomePage:
         """TC-RT-004: Homepage renders with TMS branding."""
         driver.get(base_url)
         driver.execute_script("localStorage.clear()")
+        driver.refresh()
         wait_for_app(driver)
         body = driver.find_element(By.TAG_NAME, "body").text
         assert "TMS" in body or "Telemedicine" in body, "Homepage should show TMS branding"
@@ -98,6 +101,7 @@ class TestHomePage:
         """TC-RT-005: Homepage has login/get started CTA."""
         driver.get(base_url)
         driver.execute_script("localStorage.clear()")
+        driver.refresh()
         wait_for_app(driver)
         body = driver.find_element(By.TAG_NAME, "body").text.lower()
         assert any(kw in body for kw in ["get started", "login", "sign in", "register"]), \
