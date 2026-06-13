@@ -38,6 +38,8 @@ jobs:
         run: |
           mkdir -p backend/uploads
           cd backend
+          # Remove stale DB so seed_data.py starts clean (avoids UNIQUE constraint errors)
+          rm -f telemedicine.db
           python seed_data.py
           nohup python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 &
           echo $! > uvicorn.pid
