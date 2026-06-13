@@ -14,10 +14,11 @@ from selenium.webdriver.support import expected_conditions as EC
 def login_patient(driver, base_url, email="ramesh@tms.com"):
     """Login as a patient."""
     driver.get(base_url)
+    driver.execute_script("localStorage.clear()")  # ensure clean auth state
     wait_for_app(driver)
     driver.execute_script("App.showLogin()")
     time.sleep(0.5)
-    wait = WebDriverWait(driver, 5)
+    wait = WebDriverWait(driver, 10)
     email_input = wait.until(EC.presence_of_element_located((By.ID, "login-email")))
     email_input.clear()
     email_input.send_keys(email)
@@ -25,7 +26,10 @@ def login_patient(driver, base_url, email="ramesh@tms.com"):
     pass_input.clear()
     pass_input.send_keys("Patient@123")
     driver.find_element(By.ID, "login-btn").click()
-    time.sleep(1.5)
+    # Wait for dashboard to render instead of fixed sleep
+    WebDriverWait(driver, 10).until(
+        lambda d: d.execute_script("return localStorage.getItem('tms_token') !== null")
+    )
 
 
 def logout(driver):
