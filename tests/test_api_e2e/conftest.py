@@ -352,20 +352,16 @@ def setup_database():
     app.dependency_overrides[get_db] = override_get_db
 
     # Increase rate limit for tests (default 100 req/60s is too low for 120+ tests)
+    from starlette.middleware import Middleware
     from app.main import RateLimitingMiddleware
-    for middleware in app.user_middleware:
-        if middleware.cls == RateLimitingMiddleware:
+    
+    for i, middleware in enumerate(app.user_middleware):
+        if hasattr(middleware, 'cls') and middleware.cls == RateLimitingMiddleware:
+            app.user_middleware[i] = Middleware(RateLimitingMiddleware, rate_limit=10000)
             break
-    # Clear any existing rate limit state by patching the middleware instances
-    for route in app.routes:
-        pass
-    # Directly patch the middleware's rate_limit on the app's middleware stack
-    for m in app.middleware_stack.__dict__.get("app", app).__dict__.values():
-        if isinstance(m, RateLimitingMiddleware):
-            m.rate_limit = 10000
-            break
-    # Alternative: patch all RateLimitingMiddleware instances in the ASGI stack
-    _patch_rate_limit(app.middleware_stack, 10000)
+            
+    if app.middleware_stack is not None:
+        _patch_rate_limit(app.middleware_stack, 10000)
 
     yield
     app.dependency_overrides.clear()
