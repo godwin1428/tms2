@@ -1,0 +1,150 @@
+/* ============================================
+   TMS — Telemedicine Management System
+   Design System — CSS Variables & Tokens
+   ============================================ */
+
+:root {
+  /* ── Primary "Medical Blue" Palette ── */
+  --primary-50:  #e8f4fd;
+  --primary-100: #c5e3fa;
+  --primary-200: #9dd0f6;
+  --primary-300: #6dbbf1;
+  --primary-400: #42a8ec;
+  --primary-500: #1a95e6;
+  --primary-600: #0d7dd4;
+  --primary-700: #0a66b5;
+  --primary-800: #084f8f;
+  --primary-900: #053768;
+
+  /* ── Accent (Teal-Green for health/vitals) ── */
+  --accent-50:  #e6faf5;
+  --accent-100: #b3f0de;
+  --accent-200: #80e6c7;
+  --accent-300: #4ddcb0;
+  --accent-400: #26d49e;
+  --accent-500: #00cc8c;
+  --accent-600: #00b37a;
+  --accent-700: #009966;
+  --accent-800: #008052;
+  --accent-900: #00663d;
+
+  /* ── Danger / Alert ── */
+  --danger-50:  #fef2f2;
+  --danger-100: #fee2e2;
+  --danger-200: #fecaca;
+  --danger-300: #fca5a5;
+  --danger-400: #f87171;
+  --danger-500: #ef4444;
+  --danger-600: #dc2626;
+  --danger-700: #b91c1c;
+
+  /* ── Warning ── */
+  --warning-50:  #fffbeb;
+  --warning-100: #fef3c7;
+  --warning-200: #fde68a;
+  --warning-300: #fcd34d;
+  --warning-400: #fbbf24;
+  --warning-500: #f59e0b;
+  --warning-600: #d97706;
+
+  /* ── Success ── */
+  --success-50:  #f0fdf4;
+  --success-100: #dcfce7;
+  --success-200: #bbf7d0;
+  --success-400: #4ade80;
+  --success-500: #22c55e;
+  --success-600: #16a34a;
+
+  /* ── Neutrals ── */
+  --neutral-0:   #ffffff;
+  --neutral-50:  #f8fafc;
+  --neutral-100: #f1f5f9;
+  --neutral-200: #e2e8f0;
+  --neutral-300: #cbd5e1;
+  --neutral-400: #94a3b8;
+  --neutral-500: #64748b;
+  --neutral-600: #475569;
+  --neutral-700: #334155;
+  --neutral-800: #1e293b;
+  --neutral-900: #0f172a;
+  --neutral-950: #020617;
+
+  /* ── Semantic Assignments ── */
+  --color-bg:           var(--neutral-50);
+  --color-surface:      var(--neutral-0);
+  --color-surface-alt:  var(--neutral-100);
+  --color-text:         var(--neutral-800);
+  --color-text-secondary: var(--neutral-500);
+  --color-text-muted:   var(--neutral-400);
+  --color-border:       var(--neutral-200);
+  --color-border-focus: var(--primary-400);
+  --color-primary:      var(--primary-600);
+  --color-primary-hover:var(--primary-700);
+  --color-primary-light:var(--primary-50);
+  --color-accent:       var(--accent-500);
+  --color-danger:       var(--danger-500);
+
+  /* ── Typography ── */
+  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.25rem;
+  --leading-tight:  1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed:1.65;
+
+  /* ── Spacing ── */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+
+  /* ── Radius ── */
+  --radius-sm:   0.375rem;
+  --radius-md:   0.5rem;
+  --radius-lg:   0.75rem;
+  --radius-xl:   1rem;
+  --radius-2xl:  1.25rem;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-xs:  0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:  0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.04);
+  --shadow-lg:  0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --shadow-xl:  0 20px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
+  --shadow-glow:0 0 20px rgba(26,149,230,0.15);
+  --shadow-card:0 2px 8px rgba(0,0,0,0.06), 0 0 1px rgba(0,0,0,0.1);
+
+  /* ── Transitions ── */
+  --transition-fast:   150ms cubic-bezier(0.4,0,0.2,1);
+  --transition-base:   250ms cubic-bezier(0.4,0,0.2,1);
+  --transition-slow:   350ms cubic-bezier(0.4,0,0.2,1);
+  --transition-spring: 500ms cubic-bezier(0.34,1.56,0.64,1);
+
+  /* ── Z-Index ── */
+  --z-dropdown:  1000;
+  --z-sticky:    1020;
+  --z-overlay:   1040;
+  --z-modal:     1060;
+  --z-toast:     1080;
+
+  /* ── Layout ── */
+  --sidebar-width:      280px;
+  --sidebar-collapsed:  72px;
+  --header-height:      64px;
+  --content-max-width:  1400px;
+}
