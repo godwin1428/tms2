@@ -2,7 +2,7 @@ name: Build TMS Android APK
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 'pradeepgovindarajre@gmail.com' ]
   workflow_dispatch:
 
 jobs:

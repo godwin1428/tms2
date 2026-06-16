@@ -2,7 +2,7 @@ name: Appium E2E Android Tests
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, 'pradeepgovindarajre@gmail.com' ]
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
