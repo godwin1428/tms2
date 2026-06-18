@@ -133,7 +133,7 @@ async def startup_event():
         user_count = db.query(User).count()
         if user_count == 0:
             print("[Database] Database is empty. Running seed script...")
-            from seed_data import seed_database
+            from backend.seed_data import seed_database
             seed_database()
             print("[Database] Database seeded successfully!")
         else:
