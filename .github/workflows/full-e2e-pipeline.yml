@@ -92,6 +92,10 @@ jobs:
           mv E2E_Test_Results_TMS_Final.xlsx $NEW_FILENAME
           echo "REPORT_FILE=$NEW_FILENAME" >> $GITHUB_ENV
 
+      - name: Generate Vulnerability Report
+        run: |
+          python tests/generate_vulnerability_report.py
+
       - name: Publish Test Results to Job Summary
         run: |
           python tests/publish_results.py
@@ -101,10 +105,6 @@ jobs:
         with:
           name: E2E-Test-Report
           path: ${{ env.REPORT_FILE }}
-
-      - name: Generate Vulnerability Report
-        run: |
-          python tests/generate_vulnerability_report.py
 
       - name: Upload Security Vulnerabilities Report
         uses: actions/upload-artifact@v4
