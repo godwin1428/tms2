@@ -41,8 +41,12 @@ def generate_test_cases():
     return test_cases, categories
 
 def main():
-    template_path = 'd:/pdd/E2E_Test_Resultstemplate.xlsx'
-    output_path = 'd:/pdd/E2E_Test_Results_TMS_Final.xlsx'
+    import os
+    # Get the directory where the script is located (repo root)
+    repo_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    template_path = os.path.join(repo_dir, 'E2E_Test_Resultstemplate.xlsx')
+    output_path = os.path.join(repo_dir, 'E2E_Test_Results_TMS_Final.xlsx')
     
     wb = openpyxl.load_workbook(template_path)
     
