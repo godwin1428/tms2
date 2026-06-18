@@ -22,6 +22,29 @@ def parse_report(filepath):
         
     return summary_dict, details
 
+def parse_e2e_report(filepath):
+    wb = openpyxl.load_workbook(filepath, data_only=True)
+    ws_summary = wb['Summary']
+    
+    summary_dict = {
+        'Test Suite': ws_summary['A1'].value,
+        'Total Tests': ws_summary['B9'].value,
+        'Passed': ws_summary['B10'].value,
+        'Failed': ws_summary['B11'].value,
+        'Pass Rate %': str(ws_summary['B12'].value).replace('%', ''),
+        'Duration (sec)': 'N/A' # The template doesn't have total duration in summary
+    }
+    
+    ws_details = wb['E2E Test Results']
+    detail_rows = list(ws_details.values)
+    detail_headers = [str(h) for h in detail_rows[0]]
+    details = []
+    for r in detail_rows[1:]:
+        if r and r[0] is not None:
+            details.append(dict(zip(detail_headers, r)))
+            
+    return summary_dict, details
+
 def main():
     # Configure UTF-8 stdout if possible to prevent Windows encoding crashes when printing emojis
     import sys
@@ -29,10 +52,13 @@ def main():
         sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
     repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    e2e_path = os.path.join(repo_dir, "E2E_Test_Report_TMS_2026-06-11T13-25-23.xlsx")
+    e2e_path = os.environ.get("REPORT_FILE", os.path.join(repo_dir, "E2E_Test_Results_TMS_Final.xlsx"))
+    if not os.path.isabs(e2e_path):
+        e2e_path = os.path.join(repo_dir, e2e_path)
+        
     sec_path = os.path.join(repo_dir, "Vulnerability Test Results", "Vulnerability_Report_Post_Remediation.xlsx")
     
-    e2e_summary, e2e_details = parse_report(e2e_path)
+    e2e_summary, e2e_details = parse_e2e_report(e2e_path)
     sec_summary, sec_details = parse_report(sec_path)
     
     import datetime
@@ -68,21 +94,15 @@ def main():
     markdown_output.append(f"| **Timestamp** | {current_timestamp} |")
     markdown_output.append("\n")
     
-    # E2E Details Expandable Section (Custom requested format)
-    pages = ["Home Page", "Login & Registration", "Patient Portal", "Doctor Portal", "Admin Portal"]
+    # E2E Details Expandable Section
     markdown_output.append("### 📋 E2E Test Cases Detail Breakdowns")
-    markdown_output.append(f"<details><summary>Click to view all E2E Test Cases ({len(pages) * 10} tests)</summary>\n")
-    markdown_output.append("| No. | Page | Test Name | Duration | Status |")
+    markdown_output.append(f"<details><summary>Click to view all E2E Test Cases ({len(e2e_details)} tests)</summary>\n")
+    markdown_output.append("| Test ID | Category | Test Name | Status | Details |")
     markdown_output.append("|---|---|---|---|---|")
     
-    import random
-    test_counter = 1
-    for page in pages:
-        for i in range(1, 11):
-            duration = round(random.uniform(0.1, 1.5), 2)
-            test_name = f"Verify {page} functionality {i}"
-            markdown_output.append(f"| {test_counter} | **{page}** | `{test_name}` | {duration}s | ✅ PASSED |")
-            test_counter += 1
+    for r in e2e_details:
+        status_emoji = "✅ PASSED" if str(r.get("Status")).upper() == "PASSED" else "❌ FAILED"
+        markdown_output.append(f"| {r.get('Test ID')} | **{r.get('Category')}** | `{r.get('Test Name')}` | {status_emoji} | {r.get('Details')} |")
             
     markdown_output.append("\n</details>\n")
     
