@@ -3,7 +3,8 @@
    Handles all HTTP requests to the backend.
    ============================================ */
 const API = (() => {
-  const BASE = '/api';
+  const BACKEND_URL = 'https://tms2-uw41.onrender.com';
+  const BASE = `${BACKEND_URL}/api`;
   let _accessToken = localStorage.getItem('tms_access_token');
   let _refreshToken = localStorage.getItem('tms_refresh_token');
 
@@ -96,8 +97,8 @@ const API = (() => {
 
   // WebSocket connection
   function connectWebSocket(roomId, onMessage) {
-    const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${protocol}//${location.host}/ws/${roomId}`);
+    const wsUrl = BACKEND_URL.replace('http', 'ws');
+    const ws = new WebSocket(`${wsUrl}/ws/${roomId}`);
     ws.onmessage = (e) => {
       try { onMessage(JSON.parse(e.data)); } catch { onMessage(e.data); }
     };
