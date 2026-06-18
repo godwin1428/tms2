@@ -102,11 +102,15 @@ jobs:
           name: E2E-Test-Report
           path: ${{ env.REPORT_FILE }}
 
+      - name: Generate Vulnerability Report
+        run: |
+          python tests/generate_vulnerability_report.py
+
       - name: Upload Security Vulnerabilities Report
         uses: actions/upload-artifact@v4
         with:
           name: Security-Vulnerabilities-Report
-          path: "Vulnerability Test Results/Vulnerability_Report_Post_Remediation.xlsx"
+          path: "Vulnerability Test Report.xlsx"
 
       - name: Success
         run: echo "All backend and frontend E2E tests have passed successfully against the live deployment!"
