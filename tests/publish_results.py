@@ -2,25 +2,29 @@ import os
 import openpyxl
 
 def parse_report(filepath):
-    wb = openpyxl.load_workbook(filepath, data_only=True)
-    
-    # Parse Summary
-    ws_summary = wb['Summary']
-    rows = list(ws_summary.values)
-    headers = [str(h) for h in rows[0]]
-    data = rows[1]
-    summary_dict = dict(zip(headers, data))
-    
-    # Parse Test Details
-    ws_details = wb['Test Details']
-    detail_rows = list(ws_details.values)
-    detail_headers = [str(h) for h in detail_rows[0]]
-    details = []
-    for r in detail_rows[1:]:
-        if r and r[0] is not None:
-            details.append(dict(zip(detail_headers, r)))
+    try:
+        wb = openpyxl.load_workbook(filepath, data_only=True)
         
-    return summary_dict, details
+        # Parse Risk Summary
+        ws_summary = wb['Risk Summary']
+        rows = list(ws_summary.values)
+        headers = [str(h) for h in rows[0]]
+        data = rows[1]
+        summary_dict = dict(zip(headers, data))
+        
+        # Parse Test Details
+        ws_details = wb['Security Findings']
+        detail_rows = list(ws_details.values)
+        detail_headers = [str(h) for h in detail_rows[0]]
+        details = []
+        for r in detail_rows[1:]:
+            if r and r[0] is not None:
+                details.append(dict(zip(detail_headers, r)))
+            
+        return summary_dict, details
+    except Exception as e:
+        print(f"Error parsing security report: {e}")
+        return {}, []
 
 def parse_e2e_report(filepath):
     wb = openpyxl.load_workbook(filepath, data_only=True)
@@ -56,7 +60,7 @@ def main():
     if not os.path.isabs(e2e_path):
         e2e_path = os.path.join(repo_dir, e2e_path)
         
-    sec_path = os.path.join(repo_dir, "Vulnerability Test Results", "Vulnerability_Report_Post_Remediation.xlsx")
+    sec_path = os.path.join(repo_dir, "Vulnerability Test Report.xlsx")
     
     e2e_summary, e2e_details = parse_e2e_report(e2e_path)
     sec_summary, sec_details = parse_report(sec_path)
@@ -82,16 +86,14 @@ def main():
     markdown_output.append("\n")
     
     # Security Vulnerability Summary
-    markdown_output.append("## 🛡️ Backend Security Verification Summary")
-    markdown_output.append("| Metric | Value |")
+    markdown_output.append("## 🛡️ Backend Security Vulnerability Summary")
+    markdown_output.append("| Severity | Count |")
     markdown_output.append("|---|---|")
-    markdown_output.append(f"| **Test Suite** | {sec_summary.get('Test Suite', 'Security Scans')} |")
-    markdown_output.append(f"| **Total Test Cases** | {sec_summary.get('Total Tests')} |")
-    markdown_output.append(f"| **Passed** | ✅ {sec_summary.get('Passed')} |")
-    markdown_output.append(f"| **Failed** | ❌ {sec_summary.get('Failed')} |")
-    markdown_output.append(f"| **Pass Rate** | **{sec_summary.get('Pass Rate %')}%** |")
-    markdown_output.append(f"| **Duration** | {sec_summary.get('Duration (sec)')} sec |")
-    markdown_output.append(f"| **Timestamp** | {current_timestamp} |")
+    markdown_output.append(f"| **Critical** | 🔴 {sec_summary.get('Critical', 0)} |")
+    markdown_output.append(f"| **High** | 🟠 {sec_summary.get('High', 0)} |")
+    markdown_output.append(f"| **Medium** | 🟡 {sec_summary.get('Medium', 0)} |")
+    markdown_output.append(f"| **Low** | 🟢 {sec_summary.get('Low', 0)} |")
+    markdown_output.append(f"| **Total Findings** | **{sec_summary.get('Total', 0)}** |")
     markdown_output.append("\n")
     
     # E2E Details Expandable Section
@@ -107,13 +109,16 @@ def main():
     markdown_output.append("\n</details>\n")
     
     # Security Details Expandable Section
-    markdown_output.append("### 🔐 Security Test Cases Detail Breakdowns")
-    markdown_output.append(f"<details><summary>Click to view all Security Test Cases ({len(sec_details)} tests)</summary>\n")
-    markdown_output.append("| No. | Category | Test Name | Status |")
+    markdown_output.append("### 🔐 Security Vulnerabilities Breakdowns")
+    markdown_output.append(f"<details><summary>Click to view all Vulnerability Findings ({len(sec_details)} cases)</summary>\n")
+    markdown_output.append("| Severity | Vulnerability Type | File Path | Endpoint |")
     markdown_output.append("|---|---|---|---|")
     for r in sec_details:
-        status_emoji = "✅ PASSED" if str(r.get("Status")).upper() == "PASSED" else "❌ FAILED"
-        markdown_output.append(f"| {r.get('No.')} | {r.get('Category')} | `{r.get('Test Name')}` | {status_emoji} |")
+        sev = r.get('Severity', 'Unknown')
+        emoji = "🟡" if sev == "Medium" else "🟢"
+        if sev == "High": emoji = "🟠"
+        if sev == "Critical": emoji = "🔴"
+        markdown_output.append(f"| {emoji} {sev} | {r.get('Vulnerability Type', '-')} | `{r.get('File Path', '-')}` | `{r.get('Endpoint', '-')}` |")
     markdown_output.append("\n</details>\n")
     
     markdown_output.append("## 📦 Downloadable Test Report Artifacts")
